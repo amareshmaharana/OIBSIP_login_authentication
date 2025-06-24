@@ -2,6 +2,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 import { User } from "../models/user.model.js";
+import transporter from "../config/nodemailer.js";
 
 export const register = async (req, res) => {
   const { name, email, password } = req.body;
@@ -36,6 +37,16 @@ export const register = async (req, res) => {
       sameSite: process.env.NODE_ENV === "production" ? "none" : "Strict",
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
+
+    // for sending welcome email
+    const mailOptions = {
+      from: process.env.SENDER_EMAIL,
+      to: email,
+      subject: "Welcome to AuthCorp",
+      text: `Hello ${name},\n\nThank you for registering with us! We're excited to have you on board.\n\nBest regards,\nAuthCorp Team`,
+    };
+
+    await transporter.sendMail(mailOptions); 
 
     return res
       .status(201)
